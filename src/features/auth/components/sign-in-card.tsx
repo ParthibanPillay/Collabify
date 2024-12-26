@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { SignInFlow } from "../types"
 import { useState } from "react"
+import { TriangleAlert } from "lucide-react";
 
 interface SignInCardProps {
     setState: (state: SignInFlow) => void;
@@ -19,7 +20,21 @@ export const SignInCard = ({setState}: SignInCardProps) => {
 
     const [email,setEmail] = useState("");
     const [password,setPassword] = useState("");
+    const [error, seterror] = useState("");
     const [pending, setpending] = useState(false);
+
+    const onPasswordSignIn = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        setpending(true);
+        signIn("password",{email, password, flow: "signUp"})
+        .catch(() => {
+            seterror("Invalid error or password")
+        })
+        .finally(() => {
+            setpending(false);
+        });
+    }
 
     const onProviderSignIn = (value: "github" | "google") => {
         setpending(true)
@@ -39,8 +54,14 @@ export const SignInCard = ({setState}: SignInCardProps) => {
                 Use your email or another service to continue
             </CardDescription>
             </CardHeader>
+            {!!error && (
+                <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
+                    <TriangleAlert className="size-4"/>
+                    <p>{error}</p>
+                </div>
+            )}
             <CardContent className="space-y-5 px-0 pb-0">
-                <form className="space-y-2.5">
+                <form onSubmit={onPasswordSignIn} className="space-y-2.5">
                     <Input
                     disabled={pending}
                     value={email}

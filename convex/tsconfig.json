@@ -20,6 +20,6 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["./**/*"],
+  "include": ["./**/*", "../src/features/workspaces/api/use-create-workspace.ts"],
   "exclude": ["./_generated"]
 }

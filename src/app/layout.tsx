@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CreateWorkspaceModal } from "@/features/workspaces/components/create-workspace-modal";
 import { Modals } from "@/components/modals";
+import { jotaiProvider } from "@/components/jotai-provider";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -31,17 +32,18 @@ export default function RootLayout({
 }>) {
   return (
     <ConvexAuthNextjsServerProvider>
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ConvexClientProvider>
-          <Toaster/>
-          <Modals/>
-          {children}
-        </ConvexClientProvider>
-      </body>
-    </html>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <ConvexClientProvider>
+            <jotaiProvider>
+              <Toaster />
+              <Modals />
+              {children}
+            </jotaiProvider>
+          </ConvexClientProvider>
+        </body>
+      </html>
     </ConvexAuthNextjsServerProvider>
   );
 }

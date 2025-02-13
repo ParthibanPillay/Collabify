@@ -6,6 +6,8 @@ import { WorkspaceHeader } from "./workspace-header";
 import { SidebarItem } from "./sidebar-item";
 import { UseGetChannels } from "@/features/channels/api/use-get-channels";
 import { WorkspaceSection } from "./workspace-section";
+import { useGetMembers } from "@/features/members/api/use-get-member";
+import { UserItem } from "./user-item";
 
 const WorkspaceSidebar = () => {
     const workspaceId = useWorkspaceId();
@@ -13,6 +15,7 @@ const WorkspaceSidebar = () => {
     const { data: member, isLoading: memberLoading } = useCurrentMember({ workspaceId });
     const { data: workspace, isLoading: workspaceLoading } = useGetWorkspace({ id: workspaceId });
     const { data: channels, isLoading: channelsLoading } = UseGetChannels({ workspaceId });
+    const { data: members, isLoading: membersLoading } = useGetMembers({ workspaceId });
 
     if (workspaceLoading || memberLoading) {
         return (
@@ -59,6 +62,18 @@ const WorkspaceSidebar = () => {
                         id={item._id}
                     />
                 ))}
+            </WorkspaceSection>
+            <WorkspaceSection
+                label="Direct Messages"
+                hint="New direct messages"
+                onNew={() => { }}
+            >
+                {members?.map((item) => (
+                <UserItem 
+                key={item._id}
+                id={item._id}
+                label={item.user.name}/>
+            ))}
             </WorkspaceSection>
         </div>
     );

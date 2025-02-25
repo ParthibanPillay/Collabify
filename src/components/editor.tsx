@@ -10,6 +10,7 @@ import { ImageIcon, Smile } from "lucide-react";
 import { Hint } from "./hint";
 import { cn } from "@/lib/utils";
 import Keyboard from "quill/modules/keyboard";
+import { current } from "../../convex/members";
 
 type EditorValue = {
     image: File | null;
@@ -36,6 +37,7 @@ const Editor = ({
     variant = "create" }: EditorProps) => {
 
     const [text, setText] = useState("");
+    const [istoolbarvisible,setIstoolbarvisible] = useState(true);
 
     const submitRef = useRef(onSubmit);
     const placeholderRef = useRef(placeholder);
@@ -68,23 +70,24 @@ const Editor = ({
                     ["link"],
                     [{list:"ordered"},{list:"bullet"}]
                 ],
-                Keyboard: {
-                    bindings: {
-                        enter: {
-                            key: "Enter",
-                            handler: () => {
-                                return;
-                            }
-                        },
-                        shift_enter: {
-                            key: "Enter",
-                            shiftKey:true,
-                            handler: () => {
-                                quill.insertText(quill.getSelection()?.index || 0,"\n");
-                            },
-                        },
-                    },
-                },
+                //TODO fix this keyboard issue
+                // Keyboard: {
+                //     bindings: {
+                //         enter: {
+                //             key: "Enter",
+                //             handler: () => {
+                //                 return;
+                //             }
+                //         },
+                //         shift_enter: {
+                //             key: "Enter",
+                //             shiftKey:true,
+                //             handler: () => {
+                //                 quill.insertText(quill.getSelection()?.index || 0,"\n");
+                //             },
+                //         },
+                //     },
+                // },
             },
         };
 
@@ -117,6 +120,15 @@ const Editor = ({
         };
     }, [innerRef]);
 
+    const toggleToolbar = () => {
+        setIstoolbarvisible((current) => !current);
+        const toolbarElement = containerRef.current?.querySelector(".ql-toolbar");
+
+        if(toolbarElement) {
+            toolbarElement.classList.toggle("hidden");
+        }
+    };
+
     const isEmpty = text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
 
     return (
@@ -124,19 +136,19 @@ const Editor = ({
             <div className="flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:shadow-sm transition bg-white">
                 <div ref={containerRef} className="h-full ql-custom" />
                 <div className="flex px-2 pb-2 z-[5]">
-                    <Hint label="Hide Formatting">
+                    <Hint label={istoolbarvisible ? "Hide formatting" : "Show formatting"}>
                         <Button
-                            disabled={false}
+                            disabled={disabled}
                             size="sm"
                             variant="ghost"
-                            onClick={() => { }}
+                            onClick={toggleToolbar}
                         >
                             <PiTextAa className="size-4" />
                         </Button>
                     </Hint>
                     <Hint label="Emoji">
                         <Button
-                            disabled={false}
+                            disabled={disabled}
                             size="iconSm"
                             variant="ghost"
                             onClick={() => { }}
@@ -147,7 +159,7 @@ const Editor = ({
                     {variant === "create" && (
                         <Hint label="Image">
                             <Button
-                                disabled={false}
+                                disabled={disabled}
                                 size="iconSm"
                                 variant="ghost"
                                 onClick={() => { }}
@@ -159,7 +171,7 @@ const Editor = ({
                     {variant === "update" && (
                         <div className="ml-auto flex items-center gap-x-2">
                             <Button variant="outline" size="sm" onClick={() => { }} disabled={false}>cancel</Button>
-                            <Button size="sm" onClick={() => { }} disabled={false}
+                            <Button size="sm" onClick={() => { }} disabled={disabled || isEmpty}
                                 className="bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
                             >save</Button>
                         </div>

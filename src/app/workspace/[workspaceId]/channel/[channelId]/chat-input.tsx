@@ -4,17 +4,21 @@ import { useRef } from "react"
 
 const Editor = dynamic(() => import("@/components/editor"), { ssr: false })
 
-export const ChatInput = () => {
+interface ChatInputProps {
+    placeholder: string;
+}
+
+export const ChatInput = ({ placeholder }: ChatInputProps) => {
 
     const editorRef = useRef<Quill | null>(null);
 
     return (
         <div className="px-5 w-full">
             <Editor
-            placeholder="Test placeholder"
-            onSubmit={() => {}}
-            disabled={false}
-            innerRef={editorRef}
+                placeholder={placeholder}
+                onSubmit={() => { }}
+                disabled={false}
+                innerRef={editorRef}
             />
         </div>
     )

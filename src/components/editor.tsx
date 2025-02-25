@@ -1,13 +1,15 @@
 import Quill, { Delta, QuillOptions, Op } from "quill";
 
 import "quill/dist/quill.snow.css";
-import { MutableRefObject, useEffect, useLayoutEffect, useRef } from "react";
+import { MutableRefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 
 import { PiTextAa } from "react-icons/pi";
 import { MdSend } from "react-icons/md";
 import { ImageIcon, Smile } from "lucide-react";
 import { Hint } from "./hint";
+import { cn } from "@/lib/utils";
+import Keyboard from "quill/modules/keyboard";
 
 type EditorValue = {
     image: File | null;
@@ -24,21 +26,23 @@ interface EditorProps {
     variant?: "create" | "update";
 };
 
-const Editor = ({ 
+const Editor = ({
     onCancel,
     onSubmit,
-    placeholder="write something...",
+    placeholder = "write something...",
     defaultValue = [],
-    disabled=false,
+    disabled = false,
     innerRef,
     variant = "create" }: EditorProps) => {
+
+    const [text, setText] = useState("");
 
     const submitRef = useRef(onSubmit);
     const placeholderRef = useRef(placeholder);
     const quillRef = useRef<Quill | null>(null);
     const defaultValueRef = useRef(defaultValue);
     const containerRef = useRef<HTMLDivElement>(null);
-    const disabledRef = useRef(disabled); 
+    const disabledRef = useRef(disabled);
 
     useLayoutEffect(() => {
         submitRef.current = onSubmit;
@@ -57,17 +61,63 @@ const Editor = ({
 
         const options: QuillOptions = {
             theme: "snow",
-            placeholder: placeholderRef.current
+            placeholder: placeholderRef.current,
+            modules: {
+                toolbar: [
+                    ["bold","italic",'strike'],
+                    ["link"],
+                    [{list:"ordered"},{list:"bullet"}]
+                ],
+                Keyboard: {
+                    bindings: {
+                        enter: {
+                            key: "Enter",
+                            handler: () => {
+                                return;
+                            }
+                        },
+                        shift_enter: {
+                            key: "Enter",
+                            shiftKey:true,
+                            handler: () => {
+                                quill.insertText(quill.getSelection()?.index || 0,"\n");
+                            },
+                        },
+                    },
+                },
+            },
         };
 
-        new Quill(editorContainer, options);
+        const quill = new Quill(editorContainer, options);
+        quillRef.current = quill;
+        quillRef.current.focus();
+
+        if (innerRef) {
+            innerRef.current = quill;
+        };
+
+        quill.setContents(defaultValueRef.current);
+        setText(quill.getText());
+
+        quill.on(Quill.events.TEXT_CHANGE, () => {
+            setText(quill.getText());
+        });
 
         return () => {
+            quill.off(Quill.events.TEXT_CHANGE);
             if (container) {
                 container.innerHTML = "";
             }
-        }
-    }, []);
+            if (quillRef.current) {
+                quillRef.current = null;
+            }
+            if (innerRef) {
+                innerRef.current = null;
+            }
+        };
+    }, [innerRef]);
+
+    const isEmpty = text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
 
     return (
         <div className="flex flex-col">
@@ -116,9 +166,12 @@ const Editor = ({
                     )}
                     {variant === "create" && (
                         <Button
-                            disabled={false}
+                            disabled={disabled || isEmpty}
                             onClick={() => { }}
-                            className="ml-auto bg-[#007a5a] hover:bg-[#007a5a]/80 text-white" size="iconSm">
+                            className={cn("ml-auto",
+                                isEmpty
+                                    ? "bg-white hover:bg-white text-muted-foreground"
+                                    : "bg-[#007a5a] hover:bg-[#007a5a]/80 text-white")}>
                             <MdSend className="size-4" />
                         </Button>
                     )}
@@ -129,7 +182,7 @@ const Editor = ({
                     <strong>Shift + Return to add a new line</strong>
                 </p>
             </div>
-        </div>
+        </div >
     )
 };
 

@@ -11,6 +11,7 @@ import { Hint } from "./hint";
 import { cn } from "@/lib/utils";
 import Keyboard from "quill/modules/keyboard";
 import { current } from "../../convex/members";
+import { EmojiPopover } from "./emoji-popover";
 
 type EditorValue = {
     image: File | null;
@@ -37,7 +38,7 @@ const Editor = ({
     variant = "create" }: EditorProps) => {
 
     const [text, setText] = useState("");
-    const [istoolbarvisible,setIstoolbarvisible] = useState(true);
+    const [istoolbarvisible, setIstoolbarvisible] = useState(true);
 
     const submitRef = useRef(onSubmit);
     const placeholderRef = useRef(placeholder);
@@ -66,9 +67,9 @@ const Editor = ({
             placeholder: placeholderRef.current,
             modules: {
                 toolbar: [
-                    ["bold","italic",'strike'],
+                    ["bold", "italic", 'strike'],
                     ["link"],
-                    [{list:"ordered"},{list:"bullet"}]
+                    [{ list: "ordered" }, { list: "bullet" }]
                 ],
                 //TODO fix this keyboard issue
                 // Keyboard: {
@@ -124,10 +125,16 @@ const Editor = ({
         setIstoolbarvisible((current) => !current);
         const toolbarElement = containerRef.current?.querySelector(".ql-toolbar");
 
-        if(toolbarElement) {
+        if (toolbarElement) {
             toolbarElement.classList.toggle("hidden");
         }
     };
+
+    const onEmojiSelect = (emoji: any) => {
+        const quill = quillRef.current;
+
+        quill?.insertText(quill?.getSelection()?.index || 0,emoji.native);
+    }
 
     const isEmpty = text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
 
@@ -146,16 +153,15 @@ const Editor = ({
                             <PiTextAa className="size-4" />
                         </Button>
                     </Hint>
-                    <Hint label="Emoji">
+                    <EmojiPopover onEmojiSelect={onEmojiSelect}>
                         <Button
                             disabled={disabled}
                             size="iconSm"
                             variant="ghost"
-                            onClick={() => { }}
                         >
                             <Smile className="size-4" />
                         </Button>
-                    </Hint>
+                    </EmojiPopover>
                     {variant === "create" && (
                         <Hint label="Image">
                             <Button
@@ -189,12 +195,17 @@ const Editor = ({
                     )}
                 </div>
             </div>
-            <div className="p-2 text-[10px] text-muted-foreground flex justify-end">
-                <p>
-                    <strong>Shift + Return to add a new line</strong>
-                </p>
-            </div>
-        </div >
+            {variant === "create" && (
+                <div className={cn(
+                    "p-2 text-[10px] text-muted-foreground flex justify-end opacity-0 transition",
+                    !isEmpty && "opacity-100"
+                )}>
+                    <p>
+                        <strong>Shift + Return to add a new line</strong>
+                    </p>
+                </div>
+            )}
+        </div>
     )
 };
 

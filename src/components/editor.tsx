@@ -253,7 +253,7 @@ const Editor = ({
                     !isEmpty && "opacity-100"
                 )}>
                     <p>
-                        <strong>Shift + Return to add a new line</strong>
+                        <strong>Shift + Return to add a new line...</strong>
                     </p>
                 </div>
             )}
